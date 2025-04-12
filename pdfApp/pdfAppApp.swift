@@ -7,29 +7,35 @@
 
 import SwiftUI
 import SwiftData
-
+import PDFKit
 @main
 struct pdfAppApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
+    @ObservedObject var router = Router()
+    @StateObject var mergevm=MergeViewModel()
+    @StateObject var waterMarkString = WaterMarkViewModel()
+    @StateObject var rcf = RecentFileObject()
+    let viewModelfactory=ViewModelFactory()
+init()
+    {
+        
+    }
     var body: some Scene {
+        
         WindowGroup {
+            NavigationStack(path:$router.navPath){
             ZStack{
-                HomePage()
-                
-            }
+                HomePage(navPath: $router.navPath)
+            }.navigationDestination(for: PDFKitView.self)
+                {
+                    v in
+                    v
+                }
+        }.onAppear{
+            rcf.loadlocalFiles()
         }
-        .modelContainer(sharedModelContainer)
+        }.environmentObject(waterMarkString)
+            .environmentObject(rcf)
+        .environmentObject(viewModelfactory)
+        
     }
 }

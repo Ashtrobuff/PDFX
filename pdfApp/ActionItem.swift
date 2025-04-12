@@ -16,24 +16,29 @@ struct ActionItem: View,Identifiable {
         ZStack{
             VStack{
                 HStack{
-                    ActionImage.foregroundColor(.white).padding(5).background(Color.blue).cornerRadius(10)
+                    ActionImage.foregroundColor(.black).cornerRadius(10).frame(width:30,height:30)
                     Spacer()
                     NavigationLink{
                         Text(Title)
                     }label:{
-                        Image(systemName:"arrow.up.right")
+                        Image(systemName:"arrow.up.right").foregroundColor(.secondary)
                     }
                 }
+           
+                Spacer()
+        }.padding(5)
+            VStack{
+                Spacer()
                 HStack{
-                    Text(Title).font(.caption).fontWeight(.heavy).multilineTextAlignment(.leading)
-                    Spacer()
-                }
-                HStack{
-                Text(description).font(.footnote).multilineTextAlignment(.leading)
+                Text(Title).font(.caption).fontWeight(.medium).multilineTextAlignment(.leading).foregroundColor(.secondary)
                     Spacer()
             }
-        }.padding(5)
-        }.frame(width:110,height: 110).background(Color.white).cornerRadius(10).shadow(radius: 1)
+            }.padding(.bottom,5).padding(.leading,5)
+
+        }.frame(width:110,height: 110).background(Color.white).cornerRadius(10).overlay{
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(.gray.opacity(0.5), lineWidth: 0.5)
+        }.shadow(radius: 0.5)
     }
 }
 

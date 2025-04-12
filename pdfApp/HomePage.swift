@@ -6,89 +6,89 @@
 //
 
 import SwiftUI
+import PDFKit
 
 struct HomePage: View {
    @State var selectedItem:Int=0
+   @Binding var navPath:NavigationPath
+    
+    @State var images:[UIImage]=[]
+    let columns = [GridItem(.flexible(),spacing:5), GridItem(.flexible(),spacing:0),GridItem(.flexible(),spacing:10)]
     var body: some View {
-        NavigationStack{
+    
             ZStack{
-                
                 VStack{
-                    ZStack{
-                        
-                        HStack
-                        {   NavigationLink{
-                            Text("settings Page")
+                    LazyVGrid(columns:columns,spacing:10){
+                        NavigationLink{
+                            MergeView(navpath:$navPath).navigationDestination(for: PDFKitView.self)
+                            {
+                                v in v.toolbar{
+                                    ToolbarItem(id: "email", placement: .secondaryAction) {
+                                        Button("Email Me") { }
+                                    }
+
+                                    // a third customizable button, but this one won't be in the toolbar by default
+                                    ToolbarItem(id: "credits", placement: .secondaryAction, showsByDefault: false) {
+                                        Button("Credits") { }
+                                    }
+                                } .toolbarRole(.navigationStack)
+                            }
                         }label:{
-                            Image(systemName: "ellipsis").rotationEffect(.degrees(90)).foregroundStyle(.white)
+                            ActionItem(ActionImage: Image(systemName: "arrow.trianglehead.merge"), Title: "merge", description: "")
                         }
-                            Spacer()
-                            Text("PDFX").fontDesign(.monospaced).foregroundColor(.white)
-                            Spacer()
-                            
-                        }.padding(.horizontal,20)
-                    }.frame(width:UIScreen.main.bounds.width,height:60).background(Color.mint)
-                    HStack{
-                        Text("Recents").font(.largeTitle).multilineTextAlignment(.leading).fontWeight(.bold)
-                        Spacer()}.padding(.horizontal,20)
-                    switch selectedItem
-                    {
-                    case 0:
-                        HistoryGrid().padding(.vertical,0).background(.clear)
-                    case 1:
-                        
-                       ActionPage()
-                            Spacer()
-                        
-                    case 2:
-                        Text("message")
-                        Spacer()
-                    case 3:
-                        Text("ellipsis")
-                        Spacer()
-                    default:
-                        HistoryGrid().padding(.vertical,0).background(.clear)
+                        NavigationLink{WaterMarkView()}label:{
+                            ActionItem(ActionImage: Image(systemName: "drop"), Title: "WaterMark", description: "")
+                        }
+                        NavigationLink{DocScanner(scanResult: $images)}label:{
+                            ActionItem(ActionImage: Image(systemName: "pencil"), Title: "Edit", description: "")
+                        }
+                        NavigationLink{CompressView()}label:{
+                        ActionItem(ActionImage: Image(systemName: "rectangle.compress.vertical"), Title: "Compress", description: "")
                     }
-                   
-                }
-                Spacer()
-                ZStack{
-                    
-                    Rectangle().fill(.white).frame(width:UIScreen.main.bounds.width-10,height:50).cornerRadius(30).offset(y:370).shadow(radius: 1)
-                    HStack{
-                        Image(systemName:"house")
-                            .onTapGesture {
-                                withAnimation{
-                                    self.selectedItem=0
-                                }
-                            }
-                        Spacer()
-                        Image(systemName:"gear") .onTapGesture {
-                            withAnimation{
-                            self.selectedItem=1}
-                        }
-                        Spacer()
-                        Image(systemName:"message")
-                            .onTapGesture {
-                                withAnimation{
-                                    self.selectedItem=2
-                                }
-                            }
-                        Spacer()
-                        Image(systemName:"ellipsis").rotationEffect(.degrees(90))
-                            .onTapGesture {
-                                withAnimation{
-                                selectedItem=3
-                            }
-                            }
-                    }.offset(y:370).padding(.horizontal,30)
-            }
+                        NavigationLink{CaptureView()}label:{
+                        ActionItem(ActionImage: Image(systemName: "camera"), Title: "Capture", description: "")
+                    }
+//                        Button{
+//                            let view=PDFKitView(pdfDocument:pdfDoc)
+//                            navPath.append(view)
+//                          
+//                        }label:{
+//                            Text("doc")
+//                        }
+                       
+                }.padding(10)
                 
+                Spacer()
+                    RecentFiles_()
+                }.padding(0)
+        }.navigationTitle("Actions").toolbar(id: "options") {
+            // this is a primary action, so will always be visible
+            ToolbarItem(id: "settings", placement: .primaryAction) {
+                Button("Settings") { }
+            }
+
+            // this is a standard secondary action, so will be customizable
+            ToolbarItem(id: "help", placement: .secondaryAction) {
+                Button("Help") { }
+            }
+
+            // another customizable button
+            ToolbarItem(id: "email", placement: .secondaryAction) {
+                Button("Email Me") { }
+            }
+
+            // a third customizable button, but this one won't be in the toolbar by default
+            ToolbarItem(id: "credits", placement: .secondaryAction, showsByDefault: false) {
+                Button("Credits") { }
+            }
+        }
+        .toolbarRole(.navigationStack)
+        
         }
     }
-    }
-}
+
 
 #Preview {
-    HomePage()
+    @StateObject var router=Router()
+    HomePage(navPath: $router.navPath)
 }
