@@ -53,10 +53,31 @@ class MergeViewModel:ObservableObject
         }
         return newPDFDoc
     }
+    func compressPDFWithRenderer(inputURL: URL, outputURL: URL) throws {
+        guard let document = PDFDocument(url: inputURL) else {
+            throw NSError(domain: "PDFError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not load PDF"])
+        }
+        
+        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 612, height: 792)) // Standard letter size
+        
+        try renderer.writePDF(to: outputURL) { context in
+            for i in 0..<document.pageCount {
+                guard let page = document.page(at: i) else { continue }
+                
+                let bounds = page.bounds(for: .mediaBox)
+                context.beginPage(withBounds: bounds, pageInfo: [:])
+                
+//                let transform = page.transform(for: .mediaBox)
+//                context.cgContext.concatenate(transform)
+                
+                page.draw(with: .mediaBox, to: context.cgContext)
+            }
+        }
+    }
 
 }
 
-struct PDFModel:Identifiable{
+struct PDFModel:Identifiable,Hashable{
     var id=UUID()
     var pdfDoc:PDFDocument
     var pdfThumbnail:Image
@@ -74,4 +95,7 @@ struct PDFModel:Identifiable{
         lhs.id==rhs.id &&
         lhs.pdfDoc==rhs.pdfDoc
     }
+    func hash(into hasher: inout Hasher) {
+          hasher.combine(id)
+      }
 }
